@@ -1,0 +1,15 @@
+:root { font-family: system-ui, sans-serif; color: #172033; background: #f5f7fb; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.container { max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
+.card { background: white; border: 1px solid #dfe5ef; border-radius: 12px; padding: 1.25rem; margin: 1rem 0; box-shadow: 0 2px 8px #1720330b; }
+.form-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+input { min-width: 180px; padding: .65rem .75rem; border: 1px solid #cbd3df; border-radius: 7px; }
+button { padding: .65rem .9rem; color: white; background: #2563eb; border: 0; border-radius: 7px; cursor: pointer; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+button.secondary { margin-left: .5rem; background: #64748b; }
+.notice { padding: .8rem 1rem; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; overflow-wrap: anywhere; }
+.share { display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-top: 1px solid #edf0f5; padding: .7rem 0; }
+.paid { color: #047857; font-weight: 600; }
+.amount { float: right; font-weight: 500; }
+code { overflow-wrap: anywhere; }

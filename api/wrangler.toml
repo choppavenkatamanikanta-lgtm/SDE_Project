@@ -1,0 +1,9 @@
+name = "shared-home-bill-splitter-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-09"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shared-home-bill-splitter"
+database_id = "local-development-database"
+migrations_dir = "migrations"

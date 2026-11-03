@@ -1,42 +1,46 @@
 # Shared Home Bill Splitter
 
-A shared-household expense tracker built around a Hono API on Cloudflare Workers, Cloudflare D1, and a React frontend using TanStack Router. The implementation guide is in [`shared_home_bill_splitter_documentation.md`](shared_home_bill_splitter_documentation.md).
+A small household-expense application built with Hono, Cloudflare Workers and D1, React, and TanStack Router. It supports homes, members, bill splitting, payment tracking, and outstanding balances.
 
-## Features
+## Repository contents
 
-- Create homes and add members.
-- Create bills and split totals into whole-cent shares.
-- Allocate remainder cents deterministically by member insertion order.
-- Record share payments with idempotency keys and conditional updates to avoid double payments.
-- Retrieve bills and outstanding member balances.
-- Validate input and enforce financial and referential integrity constraints in the API and database.
+- `api/` — Hono API worker and D1 schema migration.
+- `web/` — React + TanStack Router frontend and Vite development server.
+- `shared_home_bill_splitter_documentation.md` — detailed implementation notes and API reference.
 
-## Technology Stack
+## Requirements
 
-- **API:** Hono on Cloudflare Workers
-- **Database:** Cloudflare D1 / SQLite
-- **Frontend:** React with TanStack Router
-- **Language:** TypeScript
+- Node.js 20 or newer
+- pnpm 9 or newer
 
-## Implementation Guide
+## Run locally
 
-See [`shared_home_bill_splitter_documentation.md`](shared_home_bill_splitter_documentation.md) for the database schema, API handlers, frontend component, validation behavior, and response examples.
+```sh
+pnpm install
+pnpm --dir api exec wrangler d1 migrations apply shared-home-bill-splitter --local
+pnpm dev
+```
 
-## Decisions
+Open the Vite URL printed in the terminal (normally `http://localhost:5173`). The frontend proxies `/api` requests to the local Worker on port `8787`. Create a home, keep its ID to share access with housemates, add members, and create bills. Payments are simulated as ledger updates; no money is transferred.
 
-1. **Deterministic remainder allocation via an auto-incrementing sequence**
-   - Members use a `seq INTEGER PRIMARY KEY AUTOINCREMENT` column. When a bill total does not divide evenly, extra cents go to the first members ordered by `seq ASC`.
-   - This avoids relying on timestamps that may collide and makes allocation order deterministic.
+For local API health check, visit `http://localhost:8787/api/health`.
 
-2. **Conditional updates for payment concurrency and idempotency**
-   - Payments use `UPDATE bill_shares SET paid_at = ?, idempotency_key = ? WHERE id = ? AND paid_at IS NULL`.
-   - Only an unpaid share can be updated. Repeating the same idempotency key returns the existing payment; a different key for an already-paid share returns a conflict.
+## Scripts
 
-3. **Database-level integrity constraints**
-   - Positive-amount checks, foreign keys with cascading deletes, and unique idempotency keys enforce core data invariants at the database level as well as in application logic.
+- `pnpm dev` — run the local API and frontend concurrently.
+- `pnpm build` — build the frontend for production.
+- `pnpm typecheck` — type-check API and frontend.
 
-## AI Policy Disclosure
+## Deployment note
 
-- **Tools used:** Claude / Gemini for initial scaffolding and test-case pattern validation.
-- **Where used:** Structuring remainder allocation and the atomic payment update query.
-- **Verification:** The supplied implementation guide states that queries, constraints, and handlers were manually checked against `pnpm test`, `pnpm check`, and `pnpm typecheck`.
+Before deploying the Worker, create a Cloudflare D1 database and replace the placeholder `database_id` in `api/wrangler.toml` with its actual ID. Apply migrations remotely and configure a production frontend/API hosting arrangement. The checked-in D1 ID is only a local-development placeholder.
+
+## Design decisions
+
+- Member insertion order uses an auto-incrementing `seq`, ensuring stable remainder-cent allocation.
+- Payments conditionally update only unpaid shares and use unique idempotency keys to guard against duplicate payment requests.
+- SQLite checks and foreign keys enforce positive amounts and referential integrity.
+
+## AI policy disclosure
+
+The implementation guide documents the AI tools and verification approach used for the initial design. This repository's current runtime and test status should be verified locally with the commands above before submission.
